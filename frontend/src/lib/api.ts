@@ -1,4 +1,14 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// If we are on the server (SSR), we need the absolute Vercel URL.
+// If we are on the client (Browser), we can just use relative paths.
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+  if (typeof window !== "undefined") return "/api"; // Browser
+  // Server-side fallback for Vercel
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/api`;
+  return "http://localhost:8000/api"; // Local dev fallback
+};
+
+const API_URL = getBaseUrl();
 
 export type Service = {
   id: number;
