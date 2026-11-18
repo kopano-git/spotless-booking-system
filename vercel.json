@@ -5,17 +5,13 @@
       "framework": "nextjs"
     },
     "backend": {
-      "root": "backend/"
+      "root": "backend/",
+      "entrypoint": "config.wsgi:application",
+      "buildCommand": "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
     }
   },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": { "service": "backend" }
-    },
-    {
-      "source": "/(.*)",
-      "destination": { "service": "frontend" }
-    }
+    { "source": "/api/(.*)", "destination": { "service": "backend" } },
+    { "source": "/(.*)", "destination": { "service": "frontend" } }
   ]
 }
