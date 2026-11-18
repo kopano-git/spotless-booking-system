@@ -1,17 +1,9 @@
+// In the browser, use relative paths (routed by vercel.json).
+// On the server (SSR), use the absolute Vercel URL.
 const getBaseUrl = () => {
-  // 1. If you have a custom public URL (not recommended for Vercel Services), use it.
-  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-  
-  // 2. On the server (during SSR), use the injected internal service URL.
-  if (typeof window === "undefined") {
-    const internalUrl = process.env.BACKEND_INTERNAL_URL;
-    if (internalUrl) return `${internalUrl}/api`;
-    // Fallback for local dev if not using `vercel dev`
-    return "http://localhost:8000/api"; 
-  }
-  
-  // 3. In the browser, use the relative path (Vercel rewrites handle the rest).
-  return "/api";
+  if (typeof window !== "undefined") return "/api";
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/api`;
+  return "http://localhost:8000/api";
 };
 
 const API_URL = getBaseUrl();

@@ -51,8 +51,12 @@ SECRET_KEY = "django-insecure-=54a*z_b8c0@5nm8b^ox#)ssjz@g=&id=8f1&^32x1(8lpa0i2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "False"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,.vercel.app").split(",")
-
+ALLOWED_HOSTS = [
+    ".vercel.app", 
+    ".vercel-infra.com", # <-- This is the magic fix for internal services
+    "localhost", 
+    "127.0.0.1"
+]
 
 # Application definition
 
