@@ -1,5 +1,4 @@
 
-// @ts-expect-error - Next.js handles global CSS imports at build time.
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
