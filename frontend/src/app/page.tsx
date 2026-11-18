@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServices, Service } from "@/lib/api";
 import FadeIn from "@/components/FadeIn"; // <-- Import the component
 import Typewriter from "@/components/Typewriter"; // <-- Import the new component
+export const dynamic = 'force-dynamic';
 
 
 
