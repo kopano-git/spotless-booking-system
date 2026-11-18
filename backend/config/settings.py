@@ -14,28 +14,7 @@ import os
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
-
-try:
-    from importlib import import_module
-    dj_database_url = import_module("dj_database_url")
-except ModuleNotFoundError:
-    class dj_database_url:
-        @staticmethod
-        def config(default=None, **kwargs):
-            url = os.environ.get("DATABASE_URL") or default
-            if not url:
-                return {}
-
-            if url.startswith("sqlite:///"):
-                if url == "sqlite:///:memory:":
-                    name = ":memory:"
-                else:
-                    name = url[len("sqlite:///"):]
-                return {"ENGINE": "django.db.backends.sqlite3", "NAME": name}
-
-            raise ImproperlyConfigured(
-                "dj_database_url is required for non-SQLite DATABASE_URL values"
-            )
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
