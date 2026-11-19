@@ -11,11 +11,12 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  async function handleRegister(e: React.FormEvent) {
+    async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/register/`, {
+    // Use the relative path instead of localhost
+    const res = await fetch(`/api/register/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
@@ -23,7 +24,7 @@ export default function Register() {
 
     if (res.ok) {
       // Automatically log them in after successful registration
-      const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/token/`, {
+      const loginRes = await fetch(`/api/token/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -32,11 +33,10 @@ export default function Register() {
       if (loginRes.ok) {
         const data = await loginRes.json();
         localStorage.setItem("access_token", data.access);
-        router.push("/my-bookings"); // Redirect to their new dashboard
+        router.push("/my-bookings"); 
       }
     } else {
       const data = await res.json();
-      // Display the first error message from Django
       setError(Object.values(data)[0] as string || "Registration failed");
     }
   }
