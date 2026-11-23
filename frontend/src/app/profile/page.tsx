@@ -13,13 +13,19 @@ export default function Profile() {
       return;
     }
 
-    // We will fetch user details. For now, we can just fetch a simple /me endpoint.
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/me/`, {
+    // Use relative path for production
+    fetch(`/api/me/`, {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
       .then(data => setUser(data))
-      .catch(() => router.push("/login"));
+      .catch(() => {
+        localStorage.removeItem("access_token"); // Clean up bad token
+        router.push("/login");
+      });
   }, [router]);
 
   if (!user) return <div className="text-center mt-20">Loading...</div>;
