@@ -44,14 +44,12 @@ export async function getServices(): Promise<Service[]> {
 }
 
 export async function createBooking(payload: BookingPayload) {
-  // Get the token from the browser's local storage
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  // If the user is logged in, attach the Authorization header
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -63,8 +61,18 @@ export async function createBooking(payload: BookingPayload) {
   });
   
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(JSON.stringify(err));
+    // If the response is a 500 error, it usually returns HTML, not JSON.
+    // Let's try to parse it safely.
+    const text = await res.text();
+    let errorMessage = "Something went wrong";
+    try {
+      const json = JSON.parse(text);
+      errorMessage = JSON.stringify(json);
+    } catch {
+      errorMessage = `Server Error: ${res.status} - ${text.substring(0, 100)}...`;
+    }
+    console.error("Booking Error:", errorMessage);
+    throw new Error(errorMessage);
   }
   return res.json();
 }
