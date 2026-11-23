@@ -131,6 +131,8 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from urllib.parse import parse_qs, unquote, urlparse
+import dj_database_url # <-- ADD THIS
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -140,7 +142,7 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-=54a*z_b8c0@5n
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Defaults to True for local development, but Vercel will set this to False
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "False"
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
 # Allow Vercel domains and localhost
 ALLOWED_HOSTS = [".vercel.app", ".vercel-infra.com", "localhost", "127.0.0.1"]
@@ -196,10 +198,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if DATABASE_URL:
     database_url = urlparse(DATABASE_URL)
-    if database_url.scheme in ("postgres", "postgresql", "postgresql+psycopg"):
+    if database_url.scheme in ("postgres", "postgresql"):
         database_options = {
             key: values[-1] for key, values in parse_qs(database_url.query).items()
         }
+        # Neon requires SSL
+        database_options['sslmode'] = 'require' 
+        
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.postgresql",
@@ -216,12 +221,13 @@ if DATABASE_URL:
     else:
         raise ValueError(f"Unsupported DATABASE_URL scheme: {database_url.scheme}")
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+   DATABASES = {
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
