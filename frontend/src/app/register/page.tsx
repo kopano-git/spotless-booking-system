@@ -12,14 +12,14 @@ export default function Register() {
   const [loading, setLoading] = useState(false); // <-- Added loading state
   const router = useRouter();
 
-  async function handleRegister(e: React.FormEvent) {
+   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
-const res = await fetch(`${API_URL}/register/`, {
+      const res = await fetch(`${API_URL}/register/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -41,9 +41,17 @@ const res = await fetch(`${API_URL}/register/`, {
           setError("Account created, but auto-login failed. Please try logging in manually.");
         }
       } else {
-        const data = await res.json();
-        // Display the first error message from Django
-        setError(Object.values(data)[0] as string || "Registration failed");
+        // Safely try to parse the error, because Django might return HTML (500 error)
+        const text = await res.text();
+        try {
+          const data = JSON.parse(text);
+          // If it's a validation error (like username exists)
+          setError(Object.values(data)[0] as string || "Registration failed");
+        } catch {
+          // If it's a 500 Server Error (HTML response)
+          setError(`Server Error (${res.status}). Please check the database connection.`);
+          console.error("Backend Error Response:", text);
+        }
       }
     } catch (err) {
       console.error(err);
