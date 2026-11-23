@@ -36,14 +36,8 @@ export default function Navbar() {
             {/* LOGO */}
             <div className="flex-shrink-0 flex items-center z-50">
               <Link href="/">
-                <Image 
-                  src="/spotless.png" 
-                  alt="Spotless" 
-                  width={140} 
-                  height={40} 
-                  className="object-contain"
-                  priority
-                />
+                <Image src="/spotless.png" alt="Spotless" width={140} height={40} />
+
               </Link>
             </div>
 
