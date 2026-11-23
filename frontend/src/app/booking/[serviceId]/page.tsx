@@ -56,7 +56,8 @@ export default function BookingForm() {
     setSelectedTime(""); 
     setError(null);
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/availability/?date=${selectedDate}`)
+    fetch(`/api/availability/?date=${selectedDate}`)
+
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
