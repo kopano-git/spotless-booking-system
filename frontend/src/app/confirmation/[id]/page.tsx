@@ -20,7 +20,7 @@ export default function Confirmation() {
   useEffect(() => {
     if (!params.id) return;
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/bookings/${params.id}/`)
+    fetch(`/api/bookings/${params.id}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Booking not found");
         return res.json();
