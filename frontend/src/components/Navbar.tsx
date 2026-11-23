@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react"; // <-- Import icons
@@ -36,7 +35,8 @@ export default function Navbar() {
             {/* LOGO */}
             <div className="flex-shrink-0 flex items-center z-50">
               <Link href="/">
-                <Image src="/spotless.png" alt="Spotless" width={140} height={40} />
+                <img src="/spotless.png" alt="Spotless" className="h-10 w-auto object-contain" />
+
 
               </Link>
             </div>
