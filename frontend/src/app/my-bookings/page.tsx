@@ -6,6 +6,7 @@ type Booking = {
   id: number;
   scheduled_at: string;
   payment_status: string;
+  payment_method: string; // <-- Add this
   status: string;
   service_detail: {
     name: string;
@@ -66,18 +67,46 @@ export default function MyBookings() {
           </div>
         )}
         
-        {bookings.map((b) => (
-          <div key={b.id} className="bg-white p-6 rounded-xl shadow-sm border flex justify-between items-center">
+                {bookings.map((b) => (
+          <div key={b.id} className="bg-white p-6 rounded-xl shadow-sm border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            
+            {/* Left Side: Service Info */}
             <div>
-              <h2 className="font-bold text-lg">{b.service_detail.name}</h2>
+              <h2 className="font-bold text-lg text-black">{b.service_detail.name}</h2>
               <p className="text-gray-500 text-sm">{new Date(b.scheduled_at).toLocaleString()}</p>
+              
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status:</span>
+                <span className={`px-2 py-1 rounded-md text-xs font-bold ${
+                  b.status === 'completed' ? 'bg-gray-100 text-gray-700' :
+                  b.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                  b.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                  'bg-yellow-100 text-yellow-700'
+                }`}>
+                  {b.status.toUpperCase()}
+                </span>
+              </div>
             </div>
-            <div className="text-right">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${b.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+
+            {/* Right Side: Payment Info */}
+            <div className="sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0">
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                b.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+              }`}>
                 {b.payment_status.toUpperCase()}
               </span>
-              <div className="text-sm text-gray-500 mt-2 capitalize">Status: {b.status}</div>
+              
+              {b.payment_status === 'paid' ? (
+                <div className="text-sm text-gray-500 mt-2">
+                  Paid via <span className="font-medium text-black capitalize">{b.payment_method || "Unknown"}</span>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-400 mt-2 max-w-[150px]">
+                  Please have cash or card ready upon arrival.
+                </div>
+              )}
             </div>
+
           </div>
         ))}
       </div>

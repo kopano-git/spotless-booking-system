@@ -2,8 +2,6 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User  
 
-
-
 class Service(models.Model):
     CATEGORY_CHOICES = [
         ("sneaker", "Sneaker Washing"),
@@ -33,6 +31,11 @@ class Booking(models.Model):
         ("unpaid", "Unpaid"),
         ("paid", "Paid"),
     ]
+    PAYMENT_METHOD_CHOICES = [ # <-- ADDED HERE
+        ("cash", "Cash"),
+        ("card", "Card"),
+        ("eft", "EFT / Bank Transfer"),
+    ]
     LOCATION_CHOICES = [
         ("in_store", "In Store"),
         ("mobile", "Mobile"),
@@ -49,7 +52,14 @@ class Booking(models.Model):
 
     status = models.CharField(max_length=16, choices=STATUS_CHOICES, default="pending")
     payment_status = models.CharField(max_length=16, choices=PAYMENT_CHOICES, default="unpaid")
-    payment_method = models.CharField(max_length=32, blank=True)
+    
+    # UPDATED FIELD BELOW
+    payment_method = models.CharField(
+        max_length=32, 
+        choices=PAYMENT_METHOD_CHOICES, 
+        blank=True, 
+        null=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
