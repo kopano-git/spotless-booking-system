@@ -20,32 +20,32 @@ export default function MyBookings() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     
-    // 1. If no token, kick them to the login page
     if (!token) {
       router.push("/login");
       return;
     }
 
-    // 2. Fetch with the Authorization header
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"}/bookings/`, {
+    fetch(`/api/bookings/`, {
       headers: { 
         Authorization: `Bearer ${token}` 
       },
     })
       .then((res) => {
         if (res.status === 401) {
-          // Token expired or invalid
+          // Token is invalid/expired. Clear it and send to login.
           localStorage.removeItem("access_token");
           router.push("/login");
-          throw new Error("Unauthorized");
+          return null;
         }
+        if (!res.ok) throw new Error("Failed to fetch");
         return res.json();
       })
       .then((data) => {
-        setBookings(data);
+        if (data) setBookings(data);
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         setLoading(false);
       });
   }, [router]);
@@ -54,17 +54,14 @@ export default function MyBookings() {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6">
-      {/* SIMPLIFIED HEADER */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold">My Bookings</h1>
       </div>
       
-      <div className="space-y-4"></div>
-      
       <div className="space-y-4">
         {bookings.length === 0 && (
           <div className="text-center p-10 bg-white rounded-xl shadow-sm border">
-            <p className="text-gray-500 mb-4">You haven&apos;t made any bookings yet.</p>
+            <p className="text-gray-500 mb-4">You haven&Apos;t made any bookings yet.</p>
             <a href="/" className="bg-black text-white px-4 py-2 rounded-lg">Book a Service</a>
           </div>
         )}

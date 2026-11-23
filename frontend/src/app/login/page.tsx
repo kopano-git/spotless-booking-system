@@ -15,10 +15,8 @@ export default function Login() {
     setError(null);
     setLoading(true);
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
-
     try {
-      const res = await fetch(`${API_URL}/token/`, {
+      const res = await fetch(`/api/token/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -28,6 +26,7 @@ export default function Login() {
         const data = await res.json();
         localStorage.setItem("access_token", data.access);
         router.push("/my-bookings");
+        router.refresh(); // <-- Forces Next.js to reload the route with the new auth state
       } else {
         setError("Invalid username or password. Please try again.");
       }
