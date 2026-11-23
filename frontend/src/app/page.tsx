@@ -2,9 +2,10 @@ import Link from "next/link";
 import { getServices, Service } from "@/lib/api";
 import FadeIn from "@/components/FadeIn"; // <-- Import the component
 import Typewriter from "@/components/Typewriter"; // <-- Import the new component
+
+
+
 export const dynamic = 'force-dynamic';
-
-
 
 function formatDuration(minutes: number) {
   if (minutes < 60) return `${minutes} min`;
@@ -12,6 +13,7 @@ function formatDuration(minutes: number) {
   const remainingMinutes = minutes % 60;
   return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}min` : `${hours}h`;
 }
+
 
 export default async function Home() {
   const services = await getServices();
