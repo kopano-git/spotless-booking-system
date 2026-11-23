@@ -27,12 +27,12 @@ export default async function Home() {
         <FadeIn delay={100}>
           <h1 className="font-heading text-5xl sm:text-7xl font-bold tracking-tighter mb-6 text-black">
             Premium care for <br className="hidden sm:block" />
-            <span className="italic font-light">kicks & rides.</span>
+            <span className="italic font-light">rides.</span>
           </h1>
         </FadeIn>
         <FadeIn delay={400}>
           <p className="text-lg text-gray-500 max-w-xl mx-auto font-light min-h-[3rem]">
-          <Typewriter text="Premium sneaker washing, car cleaning, and mobile detailing. 
+          <Typewriter text="Premium car cleaning, and mobile detailing. 
           Book online. Pay in person upon arrival." speed={30} />
         </p>
         </FadeIn>

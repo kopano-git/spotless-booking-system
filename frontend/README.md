@@ -37,8 +37,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 # Super user
 
-Username: kopano 
-Email address: kopanovc@gmail.com
+Username: kp
+Email address: kp@gmail.com
 Password: qwe123
 
 # VENV ACTIVATION
@@ -96,3 +96,6 @@ if not Service.objects.filter(name="Car Detailing").exists():
     Service.objects.create(name="Car Detailing", category="mobile_detailing", price=700, duration_minutes=180, description="Vacuum, deep wash, restore, wash & wax polish.")
 
 print("Services updated successfully!")
+
+# RESET SETTINGS.PY
+- Cannot register user
