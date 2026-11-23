@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Polygon } from "react-leaflet";
 import L from "leaflet";
-// @ts-expect-error CSS imports are handled by the framework bundler.
 import "leaflet/dist/leaflet.css";
 
 // --- UPDATE WITH YOUR CARTO KEY ---
