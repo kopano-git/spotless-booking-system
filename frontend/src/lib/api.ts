@@ -32,6 +32,8 @@ export type BookingPayload = {
   location_type: "in_store" | "mobile";
   address?: string;
   notes?: string;
+  payment_method?: string; // <-- Add this
+
 };
 
 export async function getServices(): Promise<Service[]> {
