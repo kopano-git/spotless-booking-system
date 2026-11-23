@@ -85,6 +85,7 @@ export default function BookingForm() {
       setError("Please select a date and time.");
       return;
     }
+    
 
     setError(null);
     setSubmitting(true);
