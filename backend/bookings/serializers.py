@@ -1,3 +1,4 @@
+import zoneinfo
 from rest_framework import serializers
 from .models import Service, Booking
 from django.contrib.auth.models import User
@@ -16,6 +17,8 @@ class ServiceSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     service_detail = ServiceSerializer(source="service", read_only=True)
 
+    scheduled_at = serializers.SerializerMethodField()
+
     class Meta:
         model = Booking
         fields = [
@@ -26,26 +29,26 @@ class BookingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["status", "payment_status", "payment_method", "created_at"]
 
-    # Note: This def is now correctly indented outside of the Meta class
+    def get_scheduled_at(self, obj):
+        # Convert the UTC time from the database to Johannesburg time
+        local_tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
+        local_time = obj.scheduled_at.astimezone(local_tz)
+        # Return as a clean ISO string
+        return local_time.isoformat()
+
     def validate(self, data):
-        # Force mobile location
         data['location_type'] = 'mobile'
-        
         if not data.get("address"):
             raise serializers.ValidationError({"address": "Address is required for mobile service."})
         return data
 
     def create(self, validated_data):
-        # 1. Grab the request context
         request = self.context.get('request')
-        
-        # 2. If the user is authenticated, attach them to the booking
         if request and request.user.is_authenticated:
             validated_data['user'] = request.user
             
         booking = super().create(validated_data)
         
-        # 3. Send confirmation email (if provided)
         if booking.customer_email:
             from django.core.mail import send_mail
             send_mail(
@@ -70,9 +73,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'password')
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password']
-        )
-        return user
+        try:
+            user = User.objects.create_user(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password']
+            )
+            # Explicitly ensure the user is saved
+            user.save()
+            return user
+        except Exception as e:
+            import traceback
+            error_msg = f"REGISTRATION ERROR: {str(e)} | Traceback: {traceback.format_exc()}"
+            print(error_msg) 
+            raise serializers.ValidationError({"error": str(e)})
+

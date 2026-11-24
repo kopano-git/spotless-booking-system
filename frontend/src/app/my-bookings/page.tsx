@@ -62,7 +62,7 @@ export default function MyBookings() {
       <div className="space-y-4">
         {bookings.length === 0 && (
           <div className="text-center p-10 bg-white rounded-xl shadow-sm border">
-            <p className="text-gray-500 mb-4">You haven&Apos;t made any bookings yet.</p>
+            <p className="text-gray-500 mb-4">You haven&apos;t made any bookings yet.</p>
             <a href="/" className="bg-black text-white px-4 py-2 rounded-lg">Book a Service</a>
           </div>
         )}
@@ -73,7 +73,16 @@ export default function MyBookings() {
             {/* Left Side: Service Info */}
             <div>
               <h2 className="font-bold text-lg text-black">{b.service_detail.name}</h2>
-              <p className="text-gray-500 text-sm">{new Date(b.scheduled_at).toLocaleString()}</p>
+              <p className="text-gray-500 text-sm">
+  {new Date(b.scheduled_at).toLocaleString('en-ZA', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })}
+</p>
               
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status:</span>
