@@ -76,3 +76,27 @@ export async function createBooking(payload: BookingPayload) {
   }
   return res.json();
 }
+
+export async function updateBooking(id: number, payload: Partial<BookingPayload>) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}/bookings/${id}/`, {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify(payload),
+  });
+  
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(JSON.stringify(err));
+  }
+  return res.json();
+}

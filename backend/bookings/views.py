@@ -20,7 +20,8 @@ from rest_framework import generics
 @api_view(["GET"])
 def get_availability(request):
     date_str = request.query_params.get("date")
-    service_id = request.query_params.get("service_id") # <-- NEW
+    service_id = request.query_params.get("service_id")
+    booking_id = request.query_params.get("booking_id") # <-- NEW
 
     if not date_str:
         return Response({"error": "Date required"}, status=400)
@@ -30,8 +31,7 @@ def get_availability(request):
     except ValueError:
         return Response({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
 
-    # Get the duration of the service the user is trying to book
-    new_service_duration = 60 # Default to 60 mins if no service_id provided
+    new_service_duration = 60 
     if service_id:
         try:
             service = Service.objects.get(id=service_id)
@@ -39,43 +39,34 @@ def get_availability(request):
         except Service.DoesNotExist:
             pass
 
-    # Get the local timezone (Africa/Johannesburg)
     tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
 
-    # Find existing bookings for this date that are not cancelled
     existing_bookings = Booking.objects.filter(
         scheduled_at__date=target_date, 
         status__in=["pending", "confirmed"]
     )
 
-    # Convert booked times to local time and create a list of blocked hours
+    # If we are editing a booking, exclude it from the blocked list
+    if booking_id:
+        existing_bookings = existing_bookings.exclude(id=booking_id)
+
     blocked_hours = set()
     for booking in existing_bookings:
-        # Convert UTC to local time
         local_start = booking.scheduled_at.astimezone(tz)
         booking_duration = booking.service.duration_minutes
-        
-        # Calculate how many hours this booking takes
-        # e.g., if it starts at 10:00 and takes 150 mins (2.5h), it blocks 10, 11, 12
         start_hour = local_start.hour
-        # Round up the duration to the next full hour for blocking purposes
         hours_taken = (booking_duration + 59) // 60 
-        
         for h in range(hours_taken):
             blocked_hours.add(start_hour + h)
 
     slots = []
-    # Operating hours: 08:00 to 17:00 (8 AM to 5 PM)
     for hour in range(8, 18): 
-        # Check if this start time or any time during the new service duration overlaps with a blocked hour
         is_available = True
         new_hours_taken = (new_service_duration + 59) // 60
-        
         for h in range(new_hours_taken):
             if (hour + h) in blocked_hours:
                 is_available = False
                 break
-                
         if is_available:
             slots.append(f"{hour:02d}:00")
             
@@ -89,6 +80,7 @@ class ServiceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class BookingViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
+                     mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = BookingSerializer
     
@@ -98,8 +90,14 @@ class BookingViewSet(mixins.CreateModelMixin,
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        # Only return bookings belonging to the logged-in user
         return Booking.objects.filter(user=self.request.user).select_related("service").order_by("-created_at")
+
+    # Ensure users can only edit their own bookings
+    def get_object(self):
+        obj = super().get_object()
+        if obj.user != self.request.user:
+            raise PermissionDenied("You can only edit your own bookings.")
+        return obj
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

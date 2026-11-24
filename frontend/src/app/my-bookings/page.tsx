@@ -88,23 +88,33 @@ export default function MyBookings() {
               </div>
             </div>
 
-            {/* Right Side: Payment Info */}
-            <div className="sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                b.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
-              }`}>
-                {b.payment_status.toUpperCase()}
-              </span>
-              
-              {b.payment_status === 'paid' ? (
-                <div className="text-sm text-gray-500 mt-2">
-                  Paid via <span className="font-medium text-black capitalize">{b.payment_method || "Unknown"}</span>
-                </div>
-              ) : (
-                <div className="text-xs text-gray-400 mt-2 max-w-[150px]">
-                  Please have cash or card ready upon arrival.
-                </div>
-              )}
+                        {/* Right Side: Payment Info */}
+            <div className="sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0 flex flex-col items-end justify-between">
+              <div>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                  b.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {b.payment_status.toUpperCase()}
+                </span>
+                
+                {b.payment_status === 'paid' ? (
+                  <div className="text-sm text-gray-500 mt-2">
+                    Paid via <span className="font-medium text-black capitalize">{b.payment_method || "Unknown"}</span>
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400 mt-2 max-w-[150px]">
+                    Please have cash or card ready.
+                  </div>
+                )}
+              </div>
+
+              {/* Edit Button */}
+              <a 
+                href={`/my-bookings/${b.id}`}
+                className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800 underline"
+              >
+                Edit Time
+              </a>
             </div>
 
           </div>
