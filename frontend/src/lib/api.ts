@@ -60,18 +60,20 @@ export async function createBooking(payload: BookingPayload) {
     body: JSON.stringify(payload),
   });
   
-  if (!res.ok) {
-    // If the response is a 500 error, it usually returns HTML, not JSON.
-    // Let's try to parse it safely.
+    if (!res.ok) {
+    // Read the response as text first
     const text = await res.text();
     let errorMessage = "Something went wrong";
+    
     try {
+      // Try to parse it as JSON (for validation errors like "Address required")
       const json = JSON.parse(text);
       errorMessage = JSON.stringify(json);
     } catch {
-      errorMessage = `Server Error: ${res.status} - ${text.substring(0, 100)}...`;
+      // If it's HTML (a 500 error), show a clean message
+      errorMessage = "Server connection failed. Please try again later.";
+      console.error("Backend HTML Error:", text); // Log the real HTML for debugging
     }
-    console.error("Booking Error:", errorMessage);
     throw new Error(errorMessage);
   }
   return res.json();

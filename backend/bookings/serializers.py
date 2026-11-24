@@ -1,8 +1,10 @@
 import zoneinfo
-from rest_framework import serializers
-from .models import Service, Booking
 from django.contrib.auth.models import User
+from django.utils import timezone
+from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
+from .models import Service, Booking
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -30,10 +32,8 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = ["status", "payment_status", "payment_method", "created_at"]
 
     def get_scheduled_at(self, obj):
-        # Convert the UTC time from the database to Johannesburg time
-        local_tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
-        local_time = obj.scheduled_at.astimezone(local_tz)
-        # Return as a clean ISO string
+        # Use Django's timezone.localtime to convert UTC to local time safely
+        local_time = timezone.localtime(obj.scheduled_at)
         return local_time.isoformat()
 
     def validate(self, data):
