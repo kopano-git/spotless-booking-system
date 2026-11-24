@@ -51,7 +51,7 @@ def get_availability(request):
 class ServiceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Service.objects.filter(is_active=True)
     serializer_class = ServiceSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] # Anyone can view services
 
 
 class BookingViewSet(mixins.CreateModelMixin,
@@ -60,17 +60,13 @@ class BookingViewSet(mixins.CreateModelMixin,
     serializer_class = BookingSerializer
     
     def get_permissions(self):
-        # Anyone can create a booking (AllowAny), 
-        # but only logged-in users can view the list (IsAuthenticated)
-        if self.action == 'create':
-            return [AllowAny()]
+        # Anyone can view bookings? No, only logged-in users can view or create.
+        # If you want the admin to see all, they use the Django Admin interface.
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        # Only return bookings that belong to the currently logged-in user
-        if self.request.user.is_authenticated:
-            return Booking.objects.filter(user=self.request.user).select_related("service").order_by("-created_at")
-        return Booking.objects.none() # Return nothing if not logged in
+        # Only return bookings belonging to the logged-in user
+        return Booking.objects.filter(user=self.request.user).select_related("service").order_by("-created_at")
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

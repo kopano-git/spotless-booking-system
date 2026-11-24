@@ -8,6 +8,10 @@ export default function BookingForm() {
   const params = useParams<{ serviceId: string }>();
   const router = useRouter();
   
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
   const getTodayString = () => {
     const d = new Date();
     const year = d.getFullYear();
@@ -19,45 +23,61 @@ export default function BookingForm() {
   const [form, setForm] = useState({
     customer_name: "",
     customer_phone: "",
-    location_type: "mobile", // Hardcoded to mobile
+    location_type: "mobile",
     address: "",
     notes: "",
   });
 
   const [selectedDate, setSelectedDate] = useState(getTodayString());
   const [selectedTime, setSelectedTime] = useState("");
-  
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Pre-fill Username
+  // 1. Check Auth & Pre-fill Username
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    if (token) {
-      fetch(`/api/me/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.username) setForm(prev => ({ ...prev, customer_name: data.username }));
-        })
-        .catch(() => {});
+    
+    if (!token) {
+      // Redirect to login if no token found
+      router.push("/login");
+      return;
     }
-  }, []);
 
-  // Fetch Available Slots when Date Changes
+    // If token exists, verify it by fetching the user profile
+    fetch(`/api/me/`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (res.status === 401) {
+          localStorage.removeItem("access_token");
+          router.push("/login");
+          return null;
+        }
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.username) {
+          setForm(prev => ({ ...prev, customer_name: data.username }));
+        }
+        setIsAuthenticated(true);
+        setCheckingAuth(false);
+      })
+      .catch(() => {
+        router.push("/login");
+      });
+  }, [router]);
+
+  // 2. Fetch Available Slots
   useEffect(() => {
-    if (!selectedDate) return;
+    if (!selectedDate || !isAuthenticated) return;
 
     setLoadingSlots(true);
     setSelectedTime(""); 
     setError(null);
 
     fetch(`/api/availability/?date=${selectedDate}`)
-
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
@@ -73,7 +93,7 @@ export default function BookingForm() {
       .finally(() => {
         setLoadingSlots(false);
       });
-  }, [selectedDate]);
+  }, [selectedDate, isAuthenticated]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -86,7 +106,6 @@ export default function BookingForm() {
       return;
     }
     
-
     setError(null);
     setSubmitting(true);
     
@@ -98,17 +117,25 @@ export default function BookingForm() {
         customer_phone: form.customer_phone,
         service: Number(params.serviceId),
         scheduled_at: scheduledDateTime,
-        location_type: "mobile", // Always send mobile
+        location_type: "mobile",
         address: form.address,
         notes: form.notes,
       });
       router.push(`/confirmation/${booking.id}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
   }
+
+  // Show a loading state while checking authentication
+  if (checkingAuth) {
+    return <div className="text-center mt-20 text-gray-500">Checking authorization...</div>;
+  }
+
+  // Double check before rendering the form
+  if (!isAuthenticated) return null;
 
   return (
     <main className="max-w-lg mx-auto p-6 mt-10">
@@ -177,9 +204,9 @@ export default function BookingForm() {
                 ))}
               </div>
             ) : (
-                        <p className="text-xs text-gray-400 text-center font-light">
-            No online payment required. Payment is collected upon arrival, before the service begins.
-          </p>
+              <p className="text-xs text-gray-400 text-center font-light">
+                No online payment required. Payment is collected upon arrival, before the service begins.
+              </p>
             )}
           </div>
 
