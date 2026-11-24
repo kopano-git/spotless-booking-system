@@ -6,11 +6,15 @@ import Link from "next/link";
 
 type Booking = {
   id: number | string;
+  scheduled_at_display: string; // <-- NEW
   service_detail: {
     category: string;
     name: string;
   };
 };
+
+// You don't actually display the scheduled_at on the confirmation page, 
+// but if you ever do, use `booking.scheduled_at_display`.
 
 export default function Confirmation() {
   const params = useParams<{ id: string }>();

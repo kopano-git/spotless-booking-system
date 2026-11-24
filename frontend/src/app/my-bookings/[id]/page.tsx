@@ -43,8 +43,9 @@ export default function EditBooking() {
       .then(res => res.json())
       .then(data => {
         setBooking(data);
-        // Extract date and time from the ISO string
-        const dateObj = new Date(data.scheduled_at);
+
+        // Use the display field to parse the time for the UI
+        const dateObj = new Date(data.scheduled_at_display); 
         const yyyy = dateObj.getFullYear();
         const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
         const dd = String(dateObj.getDate()).padStart(2, '0');

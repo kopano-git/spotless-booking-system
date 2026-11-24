@@ -4,8 +4,7 @@ import { useRouter } from "next/navigation";
 
 type Booking = {
   id: number;
-  scheduled_at: string;
-  payment_status: string;
+  scheduled_at_display: string;  payment_status: string;
   payment_method: string; // <-- Add this
   status: string;
   service_detail: {
@@ -74,7 +73,7 @@ export default function MyBookings() {
             <div>
               <h2 className="font-bold text-lg text-black">{b.service_detail.name}</h2>
               <p className="text-gray-500 text-sm">
-  {new Date(b.scheduled_at).toLocaleString('en-ZA', {
+  {new Date(b.scheduled_at_display).toLocaleString('en-ZA', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',

@@ -19,19 +19,23 @@ class ServiceSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     service_detail = ServiceSerializer(source="service", read_only=True)
 
-    scheduled_at = serializers.SerializerMethodField()
+    scheduled_at_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Booking
         fields = [
             "id", "customer_name", "customer_phone", "customer_email",
-            "service", "service_detail", "scheduled_at", "location_type",
-            "address", "notes", "status", "payment_status",
+            "service", "service_detail", 
+            "scheduled_at",         # <-- Standard field for writing (POST/PATCH)
+            "scheduled_at_display", # <-- Custom field for reading (GET)
+            "location_type", "address", "notes", "status", "payment_status",
             "payment_method", "created_at",
         ]
         read_only_fields = ["status", "payment_status", "payment_method", "created_at"]
 
-    def get_scheduled_at(self, obj):
+    def get_scheduled_at_display(self, obj):
+        if not obj.scheduled_at:
+            return None
         # Use Django's timezone.localtime to convert UTC to local time safely
         local_time = timezone.localtime(obj.scheduled_at)
         return local_time.isoformat()
