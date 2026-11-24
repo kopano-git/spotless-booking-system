@@ -101,14 +101,8 @@ export default function BookingForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedDate || !selectedTime) {
-      setError("Please select a date and time.");
-      return;
-    }
-    
     setError(null);
     setSubmitting(true);
-    
     try {
       const scheduledDateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
 
@@ -122,8 +116,8 @@ export default function BookingForm() {
         notes: form.notes,
       });
       router.push(`/confirmation/${booking.id}`);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSubmitting(false);
     }
