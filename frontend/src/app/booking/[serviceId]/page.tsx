@@ -57,9 +57,14 @@ export default function BookingForm() {
         }
         return res.json();
       })
-      .then(data => {
+            .then(data => {
         if (data && data.username) {
-          setForm(prev => ({ ...prev, customer_name: data.username }));
+          setForm(prev => ({ 
+            ...prev, 
+            customer_name: data.username,
+            customer_phone: data.last_phone || "",
+            address: data.last_address || ""
+          }));
         }
         setIsAuthenticated(true);
         setCheckingAuth(false);

@@ -111,9 +111,14 @@ def register_user(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_profile(request):
+    # Get the most recent booking for this user (if any)
+    last_booking = Booking.objects.filter(user=request.user).order_by('-created_at').first()
+    
     return Response({
         "username": request.user.username,
-        "email": request.user.email
+        "email": request.user.email,
+        "last_phone": last_booking.customer_phone if last_booking else "",
+        "last_address": last_booking.address if last_booking else ""
     })
 
 class BookingDetailView(generics.RetrieveAPIView):
