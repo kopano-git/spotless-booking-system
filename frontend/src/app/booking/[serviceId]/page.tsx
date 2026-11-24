@@ -70,6 +70,7 @@ export default function BookingForm() {
   }, [router]);
 
   // 2. Fetch Available Slots
+   // Fetch Available Slots when Date Changes
   useEffect(() => {
     if (!selectedDate || !isAuthenticated) return;
 
@@ -77,7 +78,8 @@ export default function BookingForm() {
     setSelectedTime(""); 
     setError(null);
 
-    fetch(`/api/availability/?date=${selectedDate}`)
+    // Added &service_id=${params.serviceId}
+    fetch(`/api/availability/?date=${selectedDate}&service_id=${params.serviceId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
@@ -93,7 +95,7 @@ export default function BookingForm() {
       .finally(() => {
         setLoadingSlots(false);
       });
-  }, [selectedDate, isAuthenticated]);
+  }, [selectedDate, params.serviceId, isAuthenticated]);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));

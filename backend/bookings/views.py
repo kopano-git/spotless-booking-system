@@ -17,9 +17,11 @@ from rest_framework import generics
 
 
 
-@api_view(["GET"]) # <-- THIS DECORATOR MUST BE HERE
+@api_view(["GET"])
 def get_availability(request):
-    date_str = request.query_params.get("date") 
+    date_str = request.query_params.get("date")
+    service_id = request.query_params.get("service_id") # <-- NEW
+
     if not date_str:
         return Response({"error": "Date required"}, status=400)
     
@@ -28,22 +30,53 @@ def get_availability(request):
     except ValueError:
         return Response({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
 
+    # Get the duration of the service the user is trying to book
+    new_service_duration = 60 # Default to 60 mins if no service_id provided
+    if service_id:
+        try:
+            service = Service.objects.get(id=service_id)
+            new_service_duration = service.duration_minutes
+        except Service.DoesNotExist:
+            pass
+
     # Get the local timezone (Africa/Johannesburg)
     tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
 
-    # Filter bookings for this date, and get their local hour
-    bookings = Booking.objects.filter(
+    # Find existing bookings for this date that are not cancelled
+    existing_bookings = Booking.objects.filter(
         scheduled_at__date=target_date, 
         status__in=["pending", "confirmed"]
     )
-    
-    # Convert the booked times to local time hours
-    booked_hours = [b.scheduled_at.astimezone(tz).hour for b in bookings]
+
+    # Convert booked times to local time and create a list of blocked hours
+    blocked_hours = set()
+    for booking in existing_bookings:
+        # Convert UTC to local time
+        local_start = booking.scheduled_at.astimezone(tz)
+        booking_duration = booking.service.duration_minutes
+        
+        # Calculate how many hours this booking takes
+        # e.g., if it starts at 10:00 and takes 150 mins (2.5h), it blocks 10, 11, 12
+        start_hour = local_start.hour
+        # Round up the duration to the next full hour for blocking purposes
+        hours_taken = (booking_duration + 59) // 60 
+        
+        for h in range(hours_taken):
+            blocked_hours.add(start_hour + h)
 
     slots = []
-    # Operating hours: 08:00 to 17:00
+    # Operating hours: 08:00 to 17:00 (8 AM to 5 PM)
     for hour in range(8, 18): 
-        if hour not in booked_hours:
+        # Check if this start time or any time during the new service duration overlaps with a blocked hour
+        is_available = True
+        new_hours_taken = (new_service_duration + 59) // 60
+        
+        for h in range(new_hours_taken):
+            if (hour + h) in blocked_hours:
+                is_available = False
+                break
+                
+        if is_available:
             slots.append(f"{hour:02d}:00")
             
     return Response({"available_slots": slots})
