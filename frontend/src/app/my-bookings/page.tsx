@@ -66,7 +66,7 @@ export default function MyBookings() {
           </div>
         )}
         
-                {bookings.map((b) => (
+                {Array.isArray(bookings) && bookings.map((b) => (
           <div key={b.id} className="bg-white p-6 rounded-xl shadow-sm border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             
             {/* Left Side: Service Info */}
