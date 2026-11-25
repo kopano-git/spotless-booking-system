@@ -102,3 +102,28 @@ export async function updateBooking(id: number, payload: Partial<BookingPayload>
   }
   return res.json();
 }
+
+export async function cancelBooking(id: number) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}/bookings/${id}/cancel/`, {
+    method: "POST",
+    headers: headers,
+  });
+  
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    // Handle Django validation errors
+    const errorMessage = Object.values(err)[0] || "Failed to cancel booking";
+    throw new Error(String(errorMessage));
+  }
+  return res.json();
+}

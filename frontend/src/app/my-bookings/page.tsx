@@ -1,11 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { cancelBooking } from "@/lib/api"; 
 
 type Booking = {
   id: number;
-  scheduled_at_display: string;  payment_status: string;
-  payment_method: string; // <-- Add this
+  scheduled_at_display: string;
+  payment_status: string;
+  payment_method: string; 
   status: string;
   service_detail: {
     name: string;
@@ -15,9 +17,11 @@ type Booking = {
 export default function MyBookings() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellingId, setCancellingId] = useState<number | null>(null); // <-- Track cancellation state
   const router = useRouter();
 
-  useEffect(() => {
+  // Extracted fetch logic so we can call it again after a cancellation
+  const fetchBookings = useCallback(() => {
     const token = localStorage.getItem("access_token");
     
     if (!token) {
@@ -32,7 +36,6 @@ export default function MyBookings() {
     })
       .then((res) => {
         if (res.status === 401) {
-          // Token is invalid/expired. Clear it and send to login.
           localStorage.removeItem("access_token");
           router.push("/login");
           return null;
@@ -50,6 +53,25 @@ export default function MyBookings() {
       });
   }, [router]);
 
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  const handleCancel = async (id: number) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+
+    setCancellingId(id);
+    try {
+      await cancelBooking(id);
+      // Refresh list after cancellation
+      fetchBookings(); 
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Could not cancel booking.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   if (loading) return <div className="text-center mt-20">Loading your bookings...</div>;
 
   return (
@@ -66,15 +88,15 @@ export default function MyBookings() {
           </div>
         )}
         
-                {Array.isArray(bookings) && bookings.map((b) => (
+        {Array.isArray(bookings) && bookings.map((b) => (
           <div key={b.id} className="bg-white p-6 rounded-xl shadow-sm border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             
             {/* Left Side: Service Info */}
             <div>
               <h2 className="font-bold text-lg text-black">{b.service_detail.name}</h2>
               <p className="text-gray-500 text-sm">
-  {new Date(b.scheduled_at_display).toLocaleString()}
-</p>
+                {new Date(b.scheduled_at_display).toLocaleString()}
+              </p>
               
               <div className="mt-3 flex items-center gap-2">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status:</span>
@@ -89,7 +111,7 @@ export default function MyBookings() {
               </div>
             </div>
 
-                        {/* Right Side: Payment Info */}
+            {/* Right Side: Payment & Actions */}
             <div className="sm:text-right border-t sm:border-t-0 pt-4 sm:pt-0 flex flex-col items-end justify-between">
               <div>
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
@@ -109,16 +131,29 @@ export default function MyBookings() {
                 )}
               </div>
 
-                           {/* Edit Button */}
-              <a 
-                href={`/my-bookings/${b.id}`}
-                className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold tracking-wide text-black bg-white border border-gray-300 rounded-full hover:bg-black hover:text-white transition-all duration-200 active:scale-95"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-                Edit Time
-              </a>
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 mt-4">
+                <a 
+                  href={`/my-bookings/${b.id}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold tracking-wide text-black bg-white border border-gray-300 rounded-full hover:bg-black hover:text-white transition-all duration-200 active:scale-95"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                  Edit Time
+                </a>
+                
+                <button 
+                  onClick={() => handleCancel(b.id)}
+                  disabled={cancellingId === b.id}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold tracking-wide text-red-600 bg-white border border-red-200 rounded-full hover:bg-red-50 transition-all duration-200 active:scale-95 disabled:opacity-50"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  {cancellingId === b.id ? "Cancelling..." : "Cancel"}
+                </button>
+              </div>
             </div>
 
           </div>

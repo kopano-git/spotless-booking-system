@@ -1,5 +1,6 @@
 import zoneinfo
 
+from django.contrib.admin import action
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated # <-- Import IsAuthenticated
 
@@ -98,6 +99,24 @@ class BookingViewSet(mixins.CreateModelMixin,
         if obj.user != self.request.user:
             raise PermissionDenied("You can only edit your own bookings.")
         return obj
+
+
+# NEW: Custom action for cancelling a booking
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        booking = self.get_object()
+        
+        # Optional: Prevent cancelling within 24 hours of the appointment
+        time_until_booking = booking.scheduled_at - timezone.now()
+        if time_until_booking.total_seconds() < 86400: # 24 hours in seconds
+            raise ValidationError("You cannot cancel a booking within 24 hours of the appointment.")
+            
+        if booking.status == 'cancelled':
+            raise ValidationError("This booking is already cancelled.")
+
+        booking.status = 'cancelled'
+        booking.save()
+        return Response({"message": "Booking cancelled successfully."}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
