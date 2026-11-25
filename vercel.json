@@ -28,6 +28,10 @@
       "destination": { "service": "backend" }
     },
     {
+      "source": "/static/(.*)",
+      "destination": "/backend/staticfiles/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": { "service": "frontend" }
     }
