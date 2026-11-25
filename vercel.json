@@ -28,12 +28,8 @@
       "destination": { "service": "backend" }
     },
     {
-      "source": "/static/(.*)",
-      "destination": { "service": "backend" }
-    },
-    {
       "source": "/(.*)",
-      "destination": { "service": "frontend" } 
+      "destination": { "service": "frontend" }
     }
   ]
 }
