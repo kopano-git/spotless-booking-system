@@ -257,7 +257,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage" # <--- Check this
 
 
 # REST Framework & JWT
