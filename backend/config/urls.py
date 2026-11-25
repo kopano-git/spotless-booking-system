@@ -21,6 +21,10 @@ from rest_framework_simplejwt.views import (  # pyright: ignore[reportMissingImp
     TokenRefreshView,
 )
 
+# Add these three lines to customize the admin
+admin.site.site_header = "Spotless Admin"
+admin.site.site_title = "Spotless Portal"
+admin.site.index_title = "Welcome to Spotless Management"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
