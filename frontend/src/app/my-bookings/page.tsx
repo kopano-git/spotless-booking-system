@@ -73,14 +73,7 @@ export default function MyBookings() {
             <div>
               <h2 className="font-bold text-lg text-black">{b.service_detail.name}</h2>
               <p className="text-gray-500 text-sm">
-  {new Date(b.scheduled_at_display).toLocaleString('en-ZA', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })}
+  {new Date(b.scheduled_at_display).toLocaleString()}
 </p>
               
               <div className="mt-3 flex items-center gap-2">
