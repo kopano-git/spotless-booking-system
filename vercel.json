@@ -33,7 +33,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": { "service": "backend" }
+      "destination": { "service": "frontend" } 
     }
   ]
 }
