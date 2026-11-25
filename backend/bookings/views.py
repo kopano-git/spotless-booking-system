@@ -1,8 +1,11 @@
 import zoneinfo
 
-from django.contrib.admin import action
+from rest_framework.decorators import action
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny, IsAuthenticated # <-- Import IsAuthenticated
+
+from django.utils import timezone
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from .models import Service, Booking
 from .serializers import ServiceSerializer, BookingSerializer
@@ -78,45 +81,49 @@ class ServiceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = ServiceSerializer
     permission_classes = [AllowAny] # Anyone can view services
 
-
-class BookingViewSet(mixins.CreateModelMixin,
-                     mixins.ListModelMixin,
-                     mixins.UpdateModelMixin,
-                     viewsets.GenericViewSet):
+class BookingViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = BookingSerializer
-    
+
     def get_permissions(self):
-        # Anyone can view bookings? No, only logged-in users can view or create.
-        # If you want the admin to see all, they use the Django Admin interface.
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).select_related("service").order_by("-created_at")
+        return (
+            Booking.objects.filter(user=self.request.user)
+            .select_related("service")
+            .order_by("-created_at")
+        )
 
-    # Ensure users can only edit their own bookings
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
             raise PermissionDenied("You can only edit your own bookings.")
         return obj
 
-
-# NEW: Custom action for cancelling a booking
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
         booking = self.get_object()
-        
-        # Optional: Prevent cancelling within 24 hours of the appointment
+
         time_until_booking = booking.scheduled_at - timezone.now()
-        if time_until_booking.total_seconds() < 86400: # 24 hours in seconds
-            raise ValidationError("You cannot cancel a booking within 24 hours of the appointment.")
-            
-        if booking.status == 'cancelled':
+        if time_until_booking.total_seconds() < 86400:
+            raise ValidationError(
+                "You cannot cancel a booking within 24 hours of the appointment."
+            )
+
+        if booking.status == "cancelled":
             raise ValidationError("This booking is already cancelled.")
 
-        booking.status = 'cancelled'
+        booking.status = "cancelled"
         booking.save()
-        return Response({"message": "Booking cancelled successfully."}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Booking cancelled successfully."},
+            status=status.HTTP_200_OK,
+        )
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
