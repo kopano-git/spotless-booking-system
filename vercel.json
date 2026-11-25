@@ -15,20 +15,28 @@
     "backend": {
       "root": "backend/",
       "entrypoint": "config.wsgi:application",
-      "buildCommand": "python manage.py collectstatic --noinput && python manage.py migrate --noinput"
+      "buildCommand": "python manage.py collectstatic --noinput"
     }
   },
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "destination": { "service": "backend" }
     },
     {
-      "source": "/admin/(.*)",
+      "source": "/admin/:path*",
       "destination": { "service": "backend" }
     },
     {
-      "source": "/(.*)",
+      "source": "/static/:path*",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/",
+      "destination": { "service": "frontend" }
+    },
+    {
+      "source": "/:path*",
       "destination": { "service": "frontend" }
     }
   ]
