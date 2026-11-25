@@ -254,7 +254,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 ]
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage" # <--- Check this
