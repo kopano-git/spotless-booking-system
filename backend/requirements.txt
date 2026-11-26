@@ -15,4 +15,4 @@ python-dotenv>=1.0
 djangorestframework-simplejwt
 gunicorn
 whitenoise
-
+django-anymail[resend]

@@ -47,20 +47,23 @@ class BookingSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            validated_data['user'] = request.user
-            
         booking = super().create(validated_data)
-        
         if booking.customer_email:
             from django.core.mail import send_mail
+
             send_mail(
-                subject="Booking Confirmed - Spotless",
-                message=f"Hi {booking.customer_name},\n\nYour booking for {booking.service.name} on {booking.scheduled_at} is confirmed.\n\nPlease remember to pay in person.",
-                from_email="noreply@spotless.com",
+                subject="Your Spotless Booking is Confirmed! ✨",
+                message=f"Hi {booking.customer_name},\n\n"
+                        f"Your booking for {booking.service.name} has been confirmed.\n\n"
+                        f"📅 Date & Time: {booking.scheduled_at.strftime('%A, %d %B %Y at %H:%M')}\n"
+                        f"📍 Address: {booking.address}\n\n"
+                        f"Payment is collected upon arrival before the service begins.\n\n"
+                        f"We can't wait to make your { 'kicks' if booking.service.category == 'sneaker' else 'ride' } spotless!\n\n"
+                        f"Best regards,\n"
+                        f"The Spotless Team",
+                from_email=None, # Uses DEFAULT_FROM_EMAIL from settings
                 recipient_list=[booking.customer_email],
-                fail_silently=True,
+                fail_silently=False, # Set to False so you see errors in Vercel logs
             )
         return booking
 
