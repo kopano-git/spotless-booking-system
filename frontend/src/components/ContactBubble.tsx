@@ -17,10 +17,10 @@ export default function ContactBubble() {
   }, [isOpen]);
 
   // --- UPDATE YOUR BUSINESS DETAILS HERE ---
-  const phoneNumber = "27821234567"; 
-  const displayPhone = "+27 82 123 4567";
+  const phoneNumber = "078 079 3135"; 
+  const displayPhone = "+27 79 079 3135";
   const email = "hello@spotless.co.za";
-  const instagram = "@spotless.care";
+  const instagram = "@spotlessrides.cpt";
   // -----------------------------------------
 
   const whatsappLink = `https://wa.me/${phoneNumber}?text=Hi%20Spotless,%20I'd%20like%20to%20inquire%20about%20a%20booking.`;

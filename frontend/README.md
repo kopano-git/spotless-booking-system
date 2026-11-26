@@ -45,19 +45,6 @@ Password: qwe123
 
 source venv/bin/activate <-- INSIDE BACKEND FOLDER
 
-# NOW Features to include
-
-- social media links instagram and tik tok -- DONE
-- exact time schedule updated in backend -- DONE
-- interactive cards pop up - prompt: I want to also include these interactive cards to pop up as services, like the pic provided above- simple and clean- but it should follow my site colours and fonts
-
-
-# LATER FEATURES
-- notifications to owner when order is booked, received in a mobile device
-- Embedd south african map for location services, currently in cape town -- DONE
-- Generate a QR code -- AFTER DEPLOYING
-- Digital business card to keep in your digital wallet -- DONE
-
 
 # SERVICES & PRICING
 
@@ -98,4 +85,43 @@ if not Service.objects.filter(name="Car Detailing").exists():
 print("Services updated successfully!")
 
 # RESET SETTINGS.PY
-- Cannot register user
+- Cannot register user -- DONE
+
+# Custom Domain
+Right now, your site is spotless-zeta.vercel.app.
+
+If you have purchased a domain (like spotless.co.za), go to Vercel → Settings → Domains and add it there. You just need to update your DNS records with your domain provider.
+
+Don't forget to add your new domain to ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS in your settings.py!
+
+
+# VERCEL SUPERUSER
+- Username: kopis
+- Email: kopis@gmail.com
+- Password: qwe123
+
+
+
+
+# TODOS
+
+- Calender reminder: This will remind clients of their booking at spotless.
+- Email Confirmations: This will send the "Booking Confirmed" email to the user automatically.
+- Custom Domain Like spotless.co.za
+- WhatsApp Integration: To receive booking notifications
+- Favicon
+- My-bookings[if a booking is completed and paid, it should not be editable, it falls under booking histoty]
+- whatsapp business number
+- Instagram account
+- interactive cards pop up - prompt: I want to also include these interactive cards to pop up as services, like the pic provided above- simple and clean- but it should follow my site colours and fonts
+
+
+
+# DONE FEATURES:
+
+- Social media links instagram and tik tok -- DONE
+- Exact time schedule updated in backend -- DONE
+- Embedd south african map for location services, currently in cape town -- DONE
+- Generate a QR code -- DONE
+- No booking unless you have an account -- DONE
+- If a user is registered and has made more than 2 bookings, the address, phone number should be saved in theeir profile to remember when filling out a booking agaon, so that they dont fill out a form again for example: if user has bookeed 1 interior wash and 1 exterior wash, the neon database should put it under one user when it recognizes the username, email, phone number, address of the user, in neon database when i click on a user e.g tumisang, i should be able to see all his booking history it should not be separate -- DONE NEEDS REVIEW TO CHECK FUNCTIONALITY
