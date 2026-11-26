@@ -90,7 +90,7 @@ export async function updateBooking(id: number, payload: Partial<BookingPayload>
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}/bookings/${id}/`, {
+  const res = await fetch(`${API_URL}/bookings/${id}/`, {  // <-- Ensure the trailing slash is there
     method: "PATCH",
     headers: headers,
     body: JSON.stringify(payload),

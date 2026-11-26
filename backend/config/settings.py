@@ -253,6 +253,14 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
 ]
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",  # <-- Critical
+    "POST",
+    "PUT",
+]
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = "/static/"

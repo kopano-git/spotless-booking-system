@@ -106,13 +106,10 @@ Don't forget to add your new domain to ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS in
 # TODOS
 
 - Calender reminder: This will remind clients of their booking at spotless.
-- Email Confirmations: This will send the "Booking Confirmed" email to the user automatically.
+- Email Confirmations: This will send the "Booking Confirmed" email to the user automaticallyc -- NEEDS REVIEW
 - Custom Domain Like spotless.co.za
 - WhatsApp Integration: To receive booking notifications
 - Favicon
-- My-bookings[if a booking is completed and paid, it should not be editable, it falls under booking histoty]
-- whatsapp business number
-- Instagram account
 - interactive cards pop up - prompt: I want to also include these interactive cards to pop up as services, like the pic provided above- simple and clean- but it should follow my site colours and fonts
 
 
@@ -125,5 +122,7 @@ Don't forget to add your new domain to ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS in
 - Generate a QR code -- DONE
 - No booking unless you have an account -- DONE
 - If a user is registered and has made more than 2 bookings, the address, phone number should be saved in theeir profile to remember when filling out a booking agaon, so that they dont fill out a form again for example: if user has bookeed 1 interior wash and 1 exterior wash, the neon database should put it under one user when it recognizes the username, email, phone number, address of the user, in neon database when i click on a user e.g tumisang, i should be able to see all his booking history it should not be separate -- DONE NEEDS REVIEW TO CHECK FUNCTIONALITY
+- My-bookings[if a booking is completed and paid, it should not be editable, it falls under booking histoty]
+- whatsapp business number
+- Instagram account
 
-const whatsappLink: "https://wa.me/078 079 3185?text=Hi%20Spotless,%20I'd%20like%20to%20inquire%20about%20a%20booking."
