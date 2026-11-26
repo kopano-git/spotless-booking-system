@@ -94,7 +94,11 @@ class BookingViewSet(mixins.CreateModelMixin,
         return [IsAuthenticated()]
 
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user).select_related("service").order_by("-created_at")
+        # Only return bookings belonging to the logged-in user
+        return Booking.objects.filter(
+            user=self.request.user,
+            scheduled_at__gte=timezone.now()
+        ).select_related("service").order_by("scheduled_at")
 
     # Ensure users can only edit their own bookings
     def get_object(self):

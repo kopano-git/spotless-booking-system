@@ -1,5 +1,6 @@
 import zoneinfo
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -47,24 +48,29 @@ class BookingSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        booking = super().create(validated_data)
-        if booking.customer_email:
-            from django.core.mail import send_mail
+        # 1. Grab the request context to get the logged-in user
+        request = self.context.get('request')
+        
+        # 2. Attach the user if authenticated
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
 
-            send_mail(
-                subject="Your Spotless Booking is Confirmed! ✨",
-                message=f"Hi {booking.customer_name},\n\n"
-                        f"Your booking for {booking.service.name} has been confirmed.\n\n"
-                        f"📅 Date & Time: {booking.scheduled_at.strftime('%A, %d %B %Y at %H:%M')}\n"
-                        f"📍 Address: {booking.address}\n\n"
-                        f"Payment is collected upon arrival before the service begins.\n\n"
-                        f"We can't wait to make your { 'kicks' if booking.service.category == 'sneaker' else 'ride' } spotless!\n\n"
-                        f"Best regards,\n"
-                        f"The Spotless Team",
-                from_email=None, # Uses DEFAULT_FROM_EMAIL from settings
-                recipient_list=[booking.customer_email],
-                fail_silently=False, # Set to False so you see errors in Vercel logs
-            )
+        booking = super().create(validated_data)
+
+        send_mail(
+            subject="Your Spotless Booking is Confirmed! ✨",
+            message=f"Hi {booking.customer_name},\n\n"
+                    f"Your booking for {booking.service.name} has been confirmed.\n\n"
+                    f"📅 Date & Time: {booking.scheduled_at.strftime('%A, %d %B %Y at %H:%M')}\n"
+                    f"📍 Address: {booking.address}\n\n"
+                    f"Payment is collected upon arrival before the service begins.\n\n"
+                    f"We can't wait to make your { 'kicks' if booking.service.category == 'sneaker' else 'ride' } spotless!\n\n"
+                    f"Best regards,\n"
+                    f"The Spotless Team",
+            from_email=None,  # Uses DEFAULT_FROM_EMAIL from settings
+            recipient_list=[booking.customer_email],
+            fail_silently=False,
+        )
         return booking
 
 
