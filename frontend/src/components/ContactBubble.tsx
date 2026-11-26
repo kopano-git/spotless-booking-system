@@ -18,7 +18,7 @@ export default function ContactBubble() {
 
   // --- UPDATE YOUR BUSINESS DETAILS HERE ---
   const phoneNumber = "078 079 3135"; 
-  const displayPhone = "+27 79 079 3135";
+  const displayPhone = "+27 78 079 3135";
   const email = "hello@spotless.co.za";
   const instagram = "@spotlessrides.cpt";
   // -----------------------------------------
