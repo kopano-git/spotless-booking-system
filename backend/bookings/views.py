@@ -21,6 +21,8 @@ from rest_framework import generics
 
 
 
+
+
 @api_view(["GET"])
 def get_availability(request):
     date_str = request.query_params.get("date")
@@ -104,7 +106,12 @@ class BookingViewSet(mixins.CreateModelMixin,
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
-            raise PermissionDenied("You can only edit your own bookings.")
+            raise PermissionDenied("You can only manage your own bookings.")
+        
+        # Prevent editing/cancelling if already finished
+        if obj.status in ['completed', 'cancelled']:
+            raise ValidationError("You cannot modify a booking that is already completed or cancelled.")
+            
         return obj
 
 
