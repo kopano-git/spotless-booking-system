@@ -1,33 +1,21 @@
 import zoneinfo
-
 from rest_framework.decorators import action
 from rest_framework import viewsets, mixins
-from rest_framework.permissions import AllowAny, IsAuthenticated # <-- Import IsAuthenticated
-
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
-
 from .models import Service, Booking
-from .serializers import ServiceSerializer, BookingSerializer
-
+from .serializers import ServiceSerializer, BookingSerializer, RegisterSerializer
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
-from datetime import datetime, timedelta
-
-from .serializers import RegisterSerializer
-from rest_framework import generics
-
-
-
-
-
+from datetime import datetime
 
 @api_view(["GET"])
 def get_availability(request):
     date_str = request.query_params.get("date")
     service_id = request.query_params.get("service_id")
-    booking_id = request.query_params.get("booking_id") # <-- NEW
+    booking_id = request.query_params.get("booking_id")
 
     if not date_str:
         return Response({"error": "Date required"}, status=400)
@@ -46,13 +34,11 @@ def get_availability(request):
             pass
 
     tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
-
     existing_bookings = Booking.objects.filter(
         scheduled_at__date=target_date, 
         status__in=["pending", "confirmed"]
     )
 
-    # If we are editing a booking, exclude it from the blocked list
     if booking_id:
         existing_bookings = existing_bookings.exclude(id=booking_id)
 
@@ -81,50 +67,35 @@ def get_availability(request):
 class ServiceViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Service.objects.filter(is_active=True)
     serializer_class = ServiceSerializer
-    permission_classes = [AllowAny] # Anyone can view services
-
+    permission_classes = [AllowAny]
 
 class BookingViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
-                     mixins.UpdateModelMixin,
+                     mixins.UpdateModelMixin, # <-- This enables PATCH
                      viewsets.GenericViewSet):
     serializer_class = BookingSerializer
-    
-    def get_permissions(self):
-        # Anyone can view bookings? No, only logged-in users can view or create.
-        # If you want the admin to see all, they use the Django Admin interface.
-        return [IsAuthenticated()]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Only return bookings belonging to the logged-in user
         return Booking.objects.filter(
             user=self.request.user,
             scheduled_at__gte=timezone.now()
         ).select_related("service").order_by("scheduled_at")
 
-    # Ensure users can only edit their own bookings
     def get_object(self):
         obj = super().get_object()
         if obj.user != self.request.user:
             raise PermissionDenied("You can only manage your own bookings.")
-        
-        # Prevent editing/cancelling if already finished
         if obj.status in ['completed', 'cancelled']:
             raise ValidationError("You cannot modify a booking that is already completed or cancelled.")
-            
         return obj
 
-
-# NEW: Custom action for cancelling a booking
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
         booking = self.get_object()
-        
-        # Optional: Prevent cancelling within 24 hours of the appointment
         time_until_booking = booking.scheduled_at - timezone.now()
-        if time_until_booking.total_seconds() < 86400: # 24 hours in seconds
+        if time_until_booking.total_seconds() < 86400:
             raise ValidationError("You cannot cancel a booking within 24 hours of the appointment.")
-            
         if booking.status == 'cancelled':
             raise ValidationError("This booking is already cancelled.")
 
@@ -144,9 +115,7 @@ def register_user(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_profile(request):
-    # Get the most recent booking for this user (if any)
     last_booking = Booking.objects.filter(user=request.user).order_by('-created_at').first()
-    
     return Response({
         "username": request.user.username,
         "email": request.user.email,
@@ -157,4 +126,4 @@ def get_user_profile(request):
 class BookingDetailView(generics.RetrieveAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    permission_classes = [AllowAny] # Allow anyone with the link to view their confirmation
+    permission_classes = [AllowAny]
