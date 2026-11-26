@@ -119,7 +119,7 @@ Don't forget to add your new domain to ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS in
 
 # DONE FEATURES:
 
-- Social media links instagram and tik tok -- DONE
+- Social media links instagram -- DONE
 - Exact time schedule updated in backend -- DONE
 - Embedd south african map for location services, currently in cape town -- DONE
 - Generate a QR code -- DONE
