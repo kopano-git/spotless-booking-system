@@ -105,6 +105,7 @@ Don't forget to add your new domain to ALLOWED_HOSTS and CORS_ALLOWED_ORIGINS in
 
 # TODOS
 
+- Menu for specific cars: BIG, MEDIUM -R200 MEDIUM -R160 , SMALL -R140
 - Calender reminder: This will remind clients of their booking at spotless.
 - Email Confirmations: This will send the "Booking Confirmed" email to the user automaticallyc -- NEEDS REVIEW
 - Custom Domain Like spotless.co.za
